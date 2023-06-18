@@ -1,69 +1,37 @@
-import { Notify } from 'notiflix';
-import flatpickr from 'flatpickr';
-import 'flatpickr/dist/flatpickr.min.css';
+import flatpickr from "flatpickr";
+import "flatpickr/dist/flatpickr.min.css";
+import Notiflix from 'notiflix';
 
-const btnStart = document.querySelector('[data-start]');
-const btnStop = document.querySelector('[data-stop]');
-const fieldDays = document.querySelector('[data-days]');
-const fieldHours = document.querySelector('[data-hours]');
-const fieldMinutes = document.querySelector('[data-minutes]');
-const fieldSeconds = document.querySelector('[data-seconds]');
-const TIMER_DELAY = 1000;
-let timerId = null;
-let timerTimeChoise = null;
-
-const options = {
-  enableTime: true,
-  time_24hr: true,
-  defaultDate: new Date(),
-  minuteIncrement: 1,
-  onClose(selectedDates) {
-    timerTimeChoise = selectedDates[0];
-    if (timerTimeChoise < Date.now()) {
-      Notify.failure('Please choose a date in the future');
-      btnStart.disabled = true;
-      return;
-    }
-    btnStart.disabled = false;
-  },
+// створення посилань на елементи
+const refs = { 
+  body: document.querySelector('body'), // body
+  dateInput: document.querySelector('#datetime-picker'), // input
+  btnStartTimer: document.querySelector('[data-start]'), // button
+  daysRemaining: document.querySelector('[data-days]'), // span
+  hoursRemaining: document.querySelector('[data-hours]'), // span
+  minutesRemaining: document.querySelector('[data-minutes]'), // span
+  secondsRemaining: document.querySelector('[data-seconds]'), // span
 };
 
-btnStop.disabled = true;
-btnStart.disabled = true;
-btnStart.addEventListener('click', startTimer);
-btnStop.addEventListener('click', stopTimer);
-
-flatpickr('#datetime-picker', options);
-
-function startTimer() {
-  btnStop.disabled = false;
-  btnStart.disabled = true;
-  timerId = setInterval(() => {
-    const endTime = timerTimeChoise - Date.now();
-    if (endTime <= 0) {
-      clearInterval(timerId);
-      Notify.success('TIME IS OFF!!!!');
-      btnStop.disabled = true;
-      return;
-    }
-    const { days, hours, minutes, seconds } = convertMs(endTime);
-    fieldDays.textContent = addLeadingZero(days);
-    fieldHours.textContent = addLeadingZero(hours);
-    fieldMinutes.textContent = addLeadingZero(minutes);
-    fieldSeconds.textContent = addLeadingZero(seconds);
-  }, TIMER_DELAY);
+const options = {
+    enableTime: true,
+    time_24hr: true,
+    defaultDate: new Date(),
+    minuteIncrement: 1,
+    onClose(selectedDates) {
+        if (selectedDates[0] < new Date()) {
+            // window.alert('Please choose a date in the future');
+            Notiflix.Notify.failure('Please choose a date in the future');
+            refs.btnStartTimer.disabled = true;
+            return;
+        }
+        refs.btnStartTimer.disabled = false;
+    },
 }
 
-function stopTimer() {
-  btnStop.disabled = true;
-  btnStart.disabled = false;
-  Notify.failure('Countdows stoped.');
-  clearInterval(timerId);
-}
 
-function addLeadingZero(value) {
-  return String(value).padStart(2, '0');
-}
+
+flatpickr(refs.dateInput, options)
 
 function convertMs(ms) {
   // Number of milliseconds per unit of time
@@ -83,3 +51,33 @@ function convertMs(ms) {
 
   return { days, hours, minutes, seconds };
 }
+
+// const days = convertMs(new Date());
+// console.log(addLeadingZero(days.days), addLeadingZero(days.hours),
+//     addLeadingZero(days.minutes), addLeadingZero(days.seconds));
+
+
+function addLeadingZero(value) { 
+  return String(value).padStart(2, '0'); 
+}
+
+refs.btnStartTimer.addEventListener('click', () => {
+    let timerId = setInterval(() => {
+        const difference = new Date(refs.dateInput.value) - new Date();
+        if (difference < 0) {
+            clearInterval(timerId);
+            refs.btnStartTimer.disabled = false; // деактивація кнопки
+            Notiflix.Notify.success('Countdown finished');    
+            return
+        };
+        refs.btnStartTimer.disabled = true; 
+
+    const { days, hours, minutes, seconds } = convertMs(difference);
+  
+        refs.secondsRemaining.textContent = addLeadingZero(seconds);
+        refs.minutesRemaining.textContent = addLeadingZero(minutes);
+        refs.hoursRemaining.textContent = addLeadingZero(hours);
+        refs.daysRemaining.textContent = addLeadingZero(days);
+    }, 1000)    
+}
+)
