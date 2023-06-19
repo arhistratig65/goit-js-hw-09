@@ -22,7 +22,7 @@ const form = document.querySelector('.form');
 form.addEventListener('submit', evt => {
   evt.preventDefault()
   for (let i = 1; i <= inputAmount.value; i += 1) {
-    createPromise(i, i * inputStep.value + Number(inputDelay.value))
+    createPromise(i, Number(inputDelay.value))
       .then(({ position, delay }) => {
         // console.log(`✅ Fulfilled promise ${position} in ${delay}ms`);
         Notiflix.Notify.success(
