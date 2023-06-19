@@ -28,7 +28,7 @@ const options = {
         refs.btnStartTimer.disabled = false;
     },
 }
-
+refs.btnStartTimer.disabled = true;
 
 
 flatpickr(refs.dateInput, options)
